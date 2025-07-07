@@ -2,6 +2,10 @@
 // Create a class hierarchy with a Vehicle superclass and Car and Bike subclasses. Implement
 // methods in each subclass that print specific details, like the type of vehicle, fuel type, andmax speed.
 void main(){
+
+  Vehicle.companyName = "Honda";
+  Vehicle.showCompanyName();
+
   final car = Car();
   car.vehicleNumber = "ABC!@#";
   car.printVehicleNumber();
@@ -18,6 +22,11 @@ void main(){
 // Parent class
 abstract class Vehicle{
   static String? companyName;
+
+  static void showCompanyName() {
+    print("Company Name : $companyName");
+  }
+
   String? vehicleNumber;
   void printVehicleNumber() {
     print("Vehicle Number is : $vehicleNumber");
