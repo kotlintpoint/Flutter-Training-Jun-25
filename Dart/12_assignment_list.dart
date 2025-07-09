@@ -1,35 +1,35 @@
 import 'dart:io';
-void main()
-{
-//   print("Enter size: ");
-//   final s = stdin.readLineSync();
-//   if(s!=null){
-//   final size = int.tryParse(s);
-//       if(size!=null){
-// var numbers = List<int>.empty();
-//   for(int i=1; i<= size; i++){
-//     print("Enter number : ");
-//     final value = int.parse(stdin.readLineSync()!);
-//     numbers.add(value);
-//   }
 
-//   print(numbers);
-//   }
-  
-//   }
+void main() {
+  // Prompt the user for the first number
+  stdout.write('Enter the number: ');
+  String? input1 = stdin.readLineSync();
 
-  stdout.write('Enter a number: ');
-  String? input = stdin.readLineSync();
+  // Try to parse the first number
+  int? num1 = int.tryParse(input1 ?? '');
 
-  if (input != null && input.isNotEmpty) {
-    try {
-      int number = int.parse(input);
-      print('You entered: $number');
-    } catch (e) {
-      print('Invalid input. Please enter a valid integer.');
-    }
-  } else {
-    print('No input provided.');
+  // Handle invalid input for the first number
+  if (num1 == null) {
+    stderr.writeln('Invalid input for the first number. Please enter a valid number.');
+    exit(1); // Exit with an error code
   }
+
+  var numbers = List.empty(growable: true);
+  
+  for(int i=1; i<=num1; i++){
+    stdout.write('Enter the number$i: ');
+    String? input2 = stdin.readLineSync();
+    int? num2 = int.tryParse(input2 ?? '');
+     // Handle invalid input for the first number
+    if (num2 == null) {
+      stderr.writeln('Invalid input for the number. Please enter a valid number.');
+      exit(1); // Exit with an error code
+    }
+    numbers.add(num2);
+  }
+
+  print(numbers);
+
+  
   
 }
