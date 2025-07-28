@@ -1,20 +1,32 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:quiz_app/AnswerButton.dart';
 import 'package:quiz_app/data/questions.dart';
 import 'package:quiz_app/styled_text.dart';
 
 class QuestionsScreen extends StatefulWidget {
-  const QuestionsScreen({super.key});
+  const QuestionsScreen({super.key, required this.onSelectAnswer});
+
+  final void Function(String answer) onSelectAnswer;
 
   @override
   State<QuestionsScreen> createState() => _QuestionsScreenState();
 }
 
 class _QuestionsScreenState extends State<QuestionsScreen> {
-  final currentQuestion = questions[0];
+  var currentQuestionIndex = 0;
+
+  void answerQuestion(String answer) {
+    widget.onSelectAnswer(answer);
+    setState(() {
+      currentQuestionIndex++;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
+    final currentQuestion = questions[currentQuestionIndex];
+
     return SizedBox(
       width: double.infinity,
       child: Container(
@@ -23,11 +35,24 @@ class _QuestionsScreenState extends State<QuestionsScreen> {
           mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            StyledText(currentQuestion.text),
+            Text(
+              currentQuestion.text,
+              style: GoogleFonts.lato(
+                color: Color.fromARGB(255, 118, 218, 191),
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+              ),
+              textAlign: TextAlign.center,
+            ),
             SizedBox(height: 30),
-            ...currentQuestion.getShuffleAnswers().map((answer){
-              return AnswerButton(onTap: () {}, answerText: answer);
-            })
+            ...currentQuestion.getShuffleAnswers().map((answer) {
+              return AnswerButton(
+                onTap: () {
+                  answerQuestion(answer);
+                },
+                answerText: answer,
+              );
+            }),
           ],
         ),
       ),
