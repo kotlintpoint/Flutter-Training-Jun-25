@@ -1,4 +1,3 @@
-
 import 'dart:math';
 
 import 'package:expense_tracker/models/expense.dart';
@@ -17,20 +16,19 @@ class ExpenseItem extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(expense.title),
+            Text(expense.title, style: Theme.of(context).textTheme.titleLarge),
             Row(
               children: [
                 Text("\$${expense.amount.toStringAsFixed(2)}"),
                 const Spacer(),
                 Icon(categoryIcons[expense.category]),
-                SizedBox(width: 8,),
-                Text(expense.formatDate)
+                SizedBox(width: 8),
+                Text(expense.formatDate),
               ],
-            )
+            ),
           ],
         ),
       ),
     );
   }
-
 }
