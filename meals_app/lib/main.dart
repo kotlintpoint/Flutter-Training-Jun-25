@@ -3,6 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:meals_app/data/dummy_data.dart';
 import 'package:meals_app/screens/categories_screen.dart';
 import 'package:meals_app/screens/meals_screen.dart';
+import 'package:meals_app/screens/tabs_screen.dart';
 
 void main() {
 
@@ -17,7 +18,8 @@ void main() {
 
   runApp(MaterialApp(
     theme: theme,
-    home: const CategoriesScreen(),
+    home: TabsScreen()
+    // home: const CategoriesScreen(),
     // home: MealsScreen(title: "Category Name", meals: dummyMeals),
   ));
 }
