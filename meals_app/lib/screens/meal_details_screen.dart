@@ -13,49 +13,51 @@ class MealDetailsScreen extends StatelessWidget {
       appBar: AppBar(title: Text(meal.title), actions: [
         IconButton(onPressed: () => toggleMealFavouriteStatus(meal), icon: Icon(Icons.star))
       ],),
-      body: Column(
-        children: [
-          Image.network(
-            meal.imageUrl,
-            width: double.infinity,
-            height: 300,
-            fit: BoxFit.cover,
-          ),
-          Text(
-            'Ingredients',
-            style: Theme.of(context).textTheme.titleLarge!.copyWith(
-              color: Theme.of(context).colorScheme.primary,
-              fontWeight: FontWeight.bold,
+      body: SingleChildScrollView(
+        child: Column(
+          children: [
+            Image.network(
+              meal.imageUrl,
+              width: double.infinity,
+              height: 300,
+              fit: BoxFit.cover,
             ),
-          ),
-          SizedBox(height: 10),
-          for (final ingredients in meal.ingredients)
             Text(
-              ingredients,
-              style: Theme.of(context).textTheme.bodyMedium!.copyWith(
-                color: Theme.of(context).colorScheme.onSurface,
+              'Ingredients',
+              style: Theme.of(context).textTheme.titleLarge!.copyWith(
+                color: Theme.of(context).colorScheme.primary,
+                fontWeight: FontWeight.bold,
               ),
             ),
-          SizedBox(height: 10),
-          Text(
-            'Steps',
-            style: Theme.of(context).textTheme.titleLarge!.copyWith(
-              color: Theme.of(context).colorScheme.primary,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          for (final step in meal.steps)
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-              child: Text(
-                step,
-                textAlign: TextAlign.center,
+            SizedBox(height: 10),
+            for (final ingredients in meal.ingredients)
+              Text(
+                ingredients,
                 style: Theme.of(context).textTheme.bodyMedium!.copyWith(
                   color: Theme.of(context).colorScheme.onSurface,
                 ),
               ),
+            SizedBox(height: 10),
+            Text(
+              'Steps',
+              style: Theme.of(context).textTheme.titleLarge!.copyWith(
+                color: Theme.of(context).colorScheme.primary,
+                fontWeight: FontWeight.bold,
+              ),
             ),
-        ],
+            for (final step in meal.steps)
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                child: Text(
+                  step,
+                  textAlign: TextAlign.center,
+                  style: Theme.of(context).textTheme.bodyMedium!.copyWith(
+                    color: Theme.of(context).colorScheme.onSurface,
+                  ),
+                ),
+              ),
+          ],
+        ),
       ),
     );
   }
