@@ -5,14 +5,39 @@ import 'package:meals_app/models/meal.dart';
 import 'package:meals_app/screens/meals_screen.dart';
 import 'package:meals_app/widgets/category_grid_item.dart';
 
-class CategoriesScreen extends StatelessWidget {
+class CategoriesScreen extends StatefulWidget {
   const CategoriesScreen({super.key, required this.availableMeals});
 
   final List<Meal> availableMeals;
 
+  @override
+  State<CategoriesScreen> createState() => _CategoriesScreenState();
+}
+
+class _CategoriesScreenState extends State<CategoriesScreen>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _animationController;
+
+  @override
+  void initState() {
+    super.initState();
+    _animationController = AnimationController(
+      vsync: this,
+      duration: Duration(milliseconds: 600),
+      lowerBound: 0,
+      upperBound: 1,
+    );
+    _animationController.forward();
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    _animationController.dispose();
+  }
 
   void _selectCategory(BuildContext context, Category category) {
-    final filteredMeals = availableMeals
+    final filteredMeals = widget.availableMeals
         .where((meal) => meal.categories.contains(category.id))
         .toList();
 
@@ -26,9 +51,9 @@ class CategoriesScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      // appBar: AppBar(title: Text("Pick your Category")),
-      body: GridView(
+    return AnimatedBuilder(
+      animation: _animationController,
+      child: GridView(
         gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
           crossAxisCount: 2,
           crossAxisSpacing: 20,
@@ -45,6 +70,19 @@ class CategoriesScreen extends StatelessWidget {
               ),
             )
             .toList(),
+      ),
+      // builder: (ctx, child) => Padding(
+      //   padding: EdgeInsets.only(bottom: 100 - _animationController.value * 100),
+      //   child: child,
+      // ),
+      builder: (ctx, child) => SlideTransition(
+        position: Tween(begin: Offset(0, -0.5), end: Offset(0, 0)).animate(
+          CurvedAnimation(
+            parent: _animationController,
+            curve: Curves.easeInOut,
+          ),
+        ),
+        child: child,
       ),
     );
   }
