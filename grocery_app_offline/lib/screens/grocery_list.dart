@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:grocery_app/data/dummy_items.dart';
-import 'package:grocery_app/screens/new_item.dart';
+import 'package:grocery_app_offline/data/dummy_items.dart';
+import 'package:grocery_app_offline/screens/new_item.dart';
+import 'package:grocery_app_offline/screens/user_login.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class GroceryList extends StatefulWidget {
   const GroceryList({super.key});
@@ -10,6 +12,24 @@ class GroceryList extends StatefulWidget {
 }
 
 class _GroceryListState extends State<GroceryList> {
+
+  var userName = '';
+
+  @override
+  void initState() {
+    _loadPreference();
+    super.initState();
+  }
+
+  void _loadPreference() async {
+    final sharedPref = SharedPreferencesAsync();
+    var user =await sharedPref.getString("username");
+    setState(() {
+      userName = user ?? "";
+    });
+
+  }
+
   void _addItem() async {
     final newItem = await Navigator.of(
       context,
@@ -28,6 +48,14 @@ class _GroceryListState extends State<GroceryList> {
     setState(() {
       groceryItems.remove(item);
     });
+  }
+
+  void _logout(){
+    final sharedPref = SharedPreferencesAsync();
+    sharedPref.clear();
+    Navigator.of(
+      context,
+    ).pushReplacement(MaterialPageRoute(builder: (ctx) => UserLogin()));
   }
 
   @override
@@ -58,8 +86,9 @@ class _GroceryListState extends State<GroceryList> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Your Groceries"),
-        actions: [IconButton(onPressed: _addItem, icon: const Icon(Icons.add))],
+        title: Text("${userName == '' ? 'Your' : '$userName\'s'} Groceries"),
+        actions: [IconButton(onPressed: _addItem, icon: const Icon(Icons.add)),
+        IconButton(onPressed: _logout, icon: const Icon(Icons.logout))],
       ),
       body: content
     );
