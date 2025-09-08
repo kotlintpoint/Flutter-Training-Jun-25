@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:grocery_app_offline/data/categories.dart';
 import 'package:grocery_app_offline/data/dummy_items.dart';
+import 'package:grocery_app_offline/db/helper.dart';
+import 'package:grocery_app_offline/models/category.dart';
+import 'package:grocery_app_offline/models/grocery_item.dart';
 import 'package:grocery_app_offline/screens/new_item.dart';
 import 'package:grocery_app_offline/screens/user_login.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -12,7 +16,6 @@ class GroceryList extends StatefulWidget {
 }
 
 class _GroceryListState extends State<GroceryList> {
-
   var userName = '';
 
   @override
@@ -23,24 +26,42 @@ class _GroceryListState extends State<GroceryList> {
 
   void _loadPreference() async {
     final sharedPref = SharedPreferencesAsync();
-    var user =await sharedPref.getString("username");
+    var user = await sharedPref.getString("username");
+
     setState(() {
       userName = user ?? "";
     });
 
+    final db = await initializeDatabase();
+    final List<Map<String, dynamic>> maps = await db.query(TABLE_GROCERY_ITEM);
+    final groceryData = List.generate(maps.length, (index) {
+      return GroceryItem(
+        id: maps[index]["id"],
+        name: maps[index]["name"],
+        quantity: maps[index]["quantity"],
+        category: getCategory(maps[index]["category"]),
+      );
+    });
+    setState(() {
+      groceryItems.addAll(groceryData);
+    });
+  }
+
+  Category getCategory(title) {
+    return categories.entries.where(
+      (element) => element.value.title == title,
+    ).first.value;
   }
 
   void _addItem() async {
-    final newItem = await Navigator.of(
+    final groceryItem = await Navigator.of(
       context,
     ).push(MaterialPageRoute(builder: (ctx) => NewItem()));
-
-    if (newItem == null) {
+    if (groceryItem == null) {
       return;
     }
-
     setState(() {
-      groceryItems.add(newItem);
+      groceryItems.add(groceryItem);
     });
   }
 
@@ -50,7 +71,7 @@ class _GroceryListState extends State<GroceryList> {
     });
   }
 
-  void _logout(){
+  void _logout() {
     final sharedPref = SharedPreferencesAsync();
     sharedPref.clear();
     Navigator.of(
@@ -60,16 +81,13 @@ class _GroceryListState extends State<GroceryList> {
 
   @override
   Widget build(BuildContext context) {
+    Widget content = const Center(child: Text("No items added yet."));
 
-    Widget content = const Center(child: Text("No items added yet."),);
-
-    if(groceryItems.isNotEmpty) {
+    if (groceryItems.isNotEmpty) {
       content = ListView.builder(
         itemCount: groceryItems.length,
         itemBuilder: (ctx, index) => Dismissible(
-          onDismissed: (direction) => {
-            _removeItem(groceryItems[index])
-          },
+          onDismissed: (direction) => {_removeItem(groceryItems[index])},
           key: ValueKey(groceryItems[index].id),
           child: ListTile(
             title: Text(groceryItems[index].name),
@@ -87,10 +105,12 @@ class _GroceryListState extends State<GroceryList> {
     return Scaffold(
       appBar: AppBar(
         title: Text("${userName == '' ? 'Your' : '$userName\'s'} Groceries"),
-        actions: [IconButton(onPressed: _addItem, icon: const Icon(Icons.add)),
-        IconButton(onPressed: _logout, icon: const Icon(Icons.logout))],
+        actions: [
+          IconButton(onPressed: _addItem, icon: const Icon(Icons.add)),
+          IconButton(onPressed: _logout, icon: const Icon(Icons.logout)),
+        ],
       ),
-      body: content
+      body: content,
     );
   }
 }
