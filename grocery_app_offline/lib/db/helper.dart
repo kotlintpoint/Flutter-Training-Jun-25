@@ -1,7 +1,11 @@
 import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
 
-final TABLE_GROCERY_ITEM = "grocery_item";
+const tblGroceryItem = 'grocery_item';
+const colId = 'id';
+const colName = 'name';
+const colQuantity = 'quantity';
+const colCategory = 'category';
 
 Future<Database> initializeDatabase() async {
   final databasesPath = await getDatabasesPath();
@@ -12,7 +16,8 @@ Future<Database> initializeDatabase() async {
     version: 1,
     onCreate: (db, version) {
       db.execute(
-        "CREATE TABLE $TABLE_GROCERY_ITEM (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT, quantity INTEGER, category TEXT)",
+        "CREATE TABLE $tblGroceryItem ($colId INTEGER PRIMARY KEY AUTOINCREMENT, "
+            "$colName TEXT, $colQuantity INTEGER, $colCategory TEXT)",
       );
     },
   );

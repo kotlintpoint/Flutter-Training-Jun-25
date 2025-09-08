@@ -26,7 +26,7 @@ class _NewItemState extends State<NewItem> {
           category: _selectedCategory!,
       );
       final db = await initializeDatabase();
-      int newId = await db.insert(TABLE_GROCERY_ITEM, groceryItem.toMap());
+      int newId = await db.insert(tblGroceryItem, groceryItem.toMap());
       print("newId : $newId");
       if(newId > 0 ){
         groceryItem.id = newId;

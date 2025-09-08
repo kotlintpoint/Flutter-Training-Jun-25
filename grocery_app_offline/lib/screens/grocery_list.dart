@@ -24,33 +24,36 @@ class _GroceryListState extends State<GroceryList> {
     super.initState();
   }
 
+  Category getCategoryFromTitle(title) {
+    return categories.entries.where(
+          (element) => element.value.title == title,
+    ).first.value;
+  }
+
+  Future<List<GroceryItem>> getGroceryItems() async {
+    final db = await initializeDatabase();
+    final List<Map<String, dynamic>> maps = await db.query(tblGroceryItem);
+    return List.generate(maps.length, (index) {
+      return GroceryItem(
+        id: maps[index][colId],
+        name: maps[index][colName],
+        quantity: maps[index][colQuantity],
+        category: getCategoryFromTitle(maps[index][colCategory]),
+      );
+    });
+  }
+
   void _loadPreference() async {
     final sharedPref = SharedPreferencesAsync();
     var user = await sharedPref.getString("username");
-
     setState(() {
       userName = user ?? "";
     });
 
-    final db = await initializeDatabase();
-    final List<Map<String, dynamic>> maps = await db.query(TABLE_GROCERY_ITEM);
-    final groceryData = List.generate(maps.length, (index) {
-      return GroceryItem(
-        id: maps[index]["id"],
-        name: maps[index]["name"],
-        quantity: maps[index]["quantity"],
-        category: getCategory(maps[index]["category"]),
-      );
-    });
+    final groceryData = await getGroceryItems();
     setState(() {
       groceryItems.addAll(groceryData);
     });
-  }
-
-  Category getCategory(title) {
-    return categories.entries.where(
-      (element) => element.value.title == title,
-    ).first.value;
   }
 
   void _addItem() async {
