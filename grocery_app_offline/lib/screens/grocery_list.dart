@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:grocery_app_offline/data/categories.dart';
-import 'package:grocery_app_offline/data/dummy_items.dart';
 import 'package:grocery_app_offline/db/helper.dart';
 import 'package:grocery_app_offline/models/category.dart';
 import 'package:grocery_app_offline/models/grocery_item.dart';
@@ -17,6 +16,7 @@ class GroceryList extends StatefulWidget {
 
 class _GroceryListState extends State<GroceryList> {
   var userName = '';
+  List<GroceryItem> groceryItems = [];
 
   @override
   void initState() {
@@ -25,9 +25,10 @@ class _GroceryListState extends State<GroceryList> {
   }
 
   Category getCategoryFromTitle(title) {
-    return categories.entries.where(
-          (element) => element.value.title == title,
-    ).first.value;
+    return categories.entries
+        .where((element) => element.value.title == title)
+        .first
+        .value;
   }
 
   Future<List<GroceryItem>> getGroceryItems() async {
@@ -68,9 +69,28 @@ class _GroceryListState extends State<GroceryList> {
     });
   }
 
-  void _removeItem(item) {
+  void _removeItem(item) async {
+    final db = await initializeDatabase();
+    int count = await db.delete(tblGroceryItem, where: "$colId = ?", whereArgs: [item.id]);
+    if(count > 0) {
+      setState(() {
+        groceryItems.remove(item);
+      });
+    }
+  }
+
+  void _editGroceryItem(index) async {
+    final groceryItem = await Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (ctx) => NewItem(groceryItem: groceryItems[index]),
+      ),
+    );
+    if (groceryItem == null) {
+      return;
+    }
+    groceryItems.removeAt(index);
     setState(() {
-      groceryItems.remove(item);
+      groceryItems.insert(index, groceryItem);
     });
   }
 
@@ -92,14 +112,17 @@ class _GroceryListState extends State<GroceryList> {
         itemBuilder: (ctx, index) => Dismissible(
           onDismissed: (direction) => {_removeItem(groceryItems[index])},
           key: ValueKey(groceryItems[index].id),
-          child: ListTile(
-            title: Text(groceryItems[index].name),
-            leading: Container(
-              width: 24,
-              height: 24,
-              color: groceryItems[index].category.color,
+          child: InkWell(
+            onTap: () => _editGroceryItem(index),
+            child: ListTile(
+              title: Text(groceryItems[index].name),
+              leading: Container(
+                width: 24,
+                height: 24,
+                color: groceryItems[index].category.color,
+              ),
+              trailing: Text(groceryItems[index].quantity.toString()),
             ),
-            trailing: Text(groceryItems[index].quantity.toString()),
           ),
         ),
       );

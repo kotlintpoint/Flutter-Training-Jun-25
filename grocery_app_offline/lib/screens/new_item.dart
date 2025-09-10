@@ -5,7 +5,9 @@ import 'package:grocery_app_offline/models/category.dart';
 import 'package:grocery_app_offline/models/grocery_item.dart';
 
 class NewItem extends StatefulWidget {
-  const NewItem({super.key});
+  const NewItem({super.key, this.groceryItem});
+
+  final GroceryItem? groceryItem;
 
   @override
   State<NewItem> createState() => _NewItemState();
@@ -17,28 +19,50 @@ class _NewItemState extends State<NewItem> {
   var _enteredQuantity = 1;
   var _selectedCategory = categories[Categories.vegetables];
 
+  @override
+  void initState() {
+    if (widget.groceryItem != null) {
+      _enteredName = widget.groceryItem!.name;
+      _enteredQuantity = widget.groceryItem!.quantity;
+      _selectedCategory = widget.groceryItem!.category;
+    }
+    super.initState();
+  }
+
   void _saveItem() async {
     if (_formKey.currentState!.validate()) {
       _formKey.currentState?.save();
       final groceryItem = GroceryItem(
-          name: _enteredName,
-          quantity: _enteredQuantity,
-          category: _selectedCategory!,
+        name: _enteredName,
+        quantity: _enteredQuantity,
+        category: _selectedCategory!,
       );
       final db = await initializeDatabase();
-      int newId = await db.insert(tblGroceryItem, groceryItem.toMap());
-      print("newId : $newId");
-      if(newId > 0 ){
-        groceryItem.id = newId;
-        Navigator.of(context).pop(groceryItem);
+      if (widget.groceryItem == null) {
+        int newId = await db.insert(tblGroceryItem, groceryItem.toMap());
+        if (newId > 0) {
+          groceryItem.id = newId;
+        }
+      } else {
+        int count = await db.update(
+          tblGroceryItem,
+          groceryItem.toMap(),
+          where: "$colId = ?",
+          whereArgs: [widget.groceryItem!.id],
+        );
+        print("count : $count");
+        if(count > 0) {
+          groceryItem.id = widget.groceryItem!.id;
+        }
       }
+      Navigator.of(context).pop(groceryItem);
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("Add a new Item")),
+      appBar: AppBar(title: Text( widget.groceryItem == null ? "Add a new Item" : "Update Item")),
       body: Padding(
         padding: EdgeInsets.all(12),
         child: Form(
@@ -46,6 +70,7 @@ class _NewItemState extends State<NewItem> {
           child: Column(
             children: [
               TextFormField(
+                initialValue: _enteredName,
                 maxLength: 50,
                 decoration: InputDecoration(label: const Text("Name")),
                 validator: (value) {
@@ -69,7 +94,7 @@ class _NewItemState extends State<NewItem> {
                       decoration: InputDecoration(
                         label: const Text("Quantity"),
                       ),
-                      initialValue: '1',
+                      initialValue: _enteredQuantity.toString(),
                       keyboardType: TextInputType.number,
                       validator: (value) {
                         if (value == null ||
@@ -125,7 +150,12 @@ class _NewItemState extends State<NewItem> {
                     },
                     child: Text("Reset"),
                   ),
-                  ElevatedButton(onPressed: _saveItem, child: Text("Add Item")),
+                  ElevatedButton(
+                    onPressed: _saveItem,
+                    child: Text(
+                      widget.groceryItem == null ? "Add Item" : "Update Item",
+                    ),
+                  ),
                 ],
               ),
             ],
