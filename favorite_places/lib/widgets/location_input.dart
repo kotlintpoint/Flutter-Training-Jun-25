@@ -1,19 +1,34 @@
+import 'dart:convert';
+
+import 'package:favorite_places/models/place.dart';
 import 'package:flutter/material.dart';
 import 'package:location/location.dart';
+import 'package:http/http.dart' as http;
 
 class LocationInput extends StatefulWidget {
-  const LocationInput({super.key});
+  const LocationInput({super.key, required this.onSelectLocation});
+
+  final void Function(PlaceLocation location) onSelectLocation;
 
   @override
   State<LocationInput> createState() => _LocationInputState();
 }
 
+// AIzaSyDF0kkbnVgE8g1XUaQ-r6fV5ujufLbkJ20
 class _LocationInputState extends State<LocationInput> {
-  Location? _pickedLocation;
+  PlaceLocation? _pickedLocation;
   var _isGettingLocation = false;
 
-  void _getCurrentLocation() async {
+  String get locationImage {
+    if (_pickedLocation == null) {
+      return "";
+    }
+    final lat = _pickedLocation?.latitude;
+    final lng = _pickedLocation?.longitude;
+    return "https://maps.googleapis.com/maps/api/staticmap?center=$lat,$lng&zoom=13&size=600x300&maptype=roadmap&markers=color:red%7Clabel:A%7C$lat,$lng&key=AIzaSyDF0kkbnVgE8g1XUaQ-r6fV5ujufLbkJ20";
+  }
 
+  void _getCurrentLocation() async {
     Location location = Location();
 
     bool serviceEnabled;
@@ -42,12 +57,30 @@ class _LocationInputState extends State<LocationInput> {
 
     locationData = await location.getLocation();
 
-    setState(() {
-      _isGettingLocation = false;
-    });
-
     print(locationData.latitude);
     print(locationData.longitude);
+    double? lat = locationData.latitude;
+    double? lng = locationData.longitude;
+    if (lat == null || lng == null) {
+      return;
+    }
+    // Reverse Geocoding
+    final url = Uri.parse(
+      "https://maps.googleapis.com/maps/api/geocode/json?latlng=$lat,$lng&key=AIzaSyDF0kkbnVgE8g1XUaQ-r6fV5ujufLbkJ20",
+    );
+    final response = await http.get(url);
+    final resData = json.decode(response.body);
+    final address = resData['results'][0]['formatted_address'];
+
+    setState(() {
+      _pickedLocation = PlaceLocation(
+        latitude: lat,
+        longitude: lng,
+        address: address,
+      );
+      _isGettingLocation = false;
+    });
+    widget.onSelectLocation(_pickedLocation!);
   }
 
   @override
@@ -60,10 +93,18 @@ class _LocationInputState extends State<LocationInput> {
       ),
     );
 
-    if(_isGettingLocation) {
+    if (_isGettingLocation) {
       previewContent = CircularProgressIndicator();
     }
 
+    if (_pickedLocation != null) {
+      previewContent = Image.network(
+        locationImage,
+        width: double.infinity,
+        height: double.infinity,
+        fit: BoxFit.cover,
+      );
+    }
 
     return Column(
       children: [

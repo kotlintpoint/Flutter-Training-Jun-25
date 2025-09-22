@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:favorite_places/controller/user_places_controller.dart';
+import 'package:favorite_places/models/place.dart';
 import 'package:favorite_places/widgets/image_input.dart';
 import 'package:favorite_places/widgets/location_input.dart';
 import 'package:flutter/material.dart';
@@ -18,6 +19,7 @@ class AddPlaceScreen extends StatefulWidget {
 class _AddPlaceScreenState extends State<AddPlaceScreen> {
   final _titleController = TextEditingController();
   File? _selectedImage;
+  PlaceLocation? _selectedLocation;
 
   @override
   void dispose() {
@@ -28,10 +30,10 @@ class _AddPlaceScreenState extends State<AddPlaceScreen> {
   final controller = Get.find<UserPlacesController>();
   void _savePlace() {
     final enteredTitle = _titleController.text;
-    if(enteredTitle.isEmpty || _selectedImage == null){
+    if(enteredTitle.isEmpty || _selectedImage == null || _selectedLocation==null){
       return;
     }
-    controller.addPlace(enteredTitle, _selectedImage!);
+    controller.addPlace(enteredTitle, _selectedImage!, _selectedLocation!);
     // Navigator.of(context).pop();
     Get.back();
   }
@@ -60,7 +62,11 @@ class _AddPlaceScreenState extends State<AddPlaceScreen> {
               }
             ),
             const SizedBox(height: 10),
-            LocationInput(),
+            LocationInput(
+              onSelectLocation: (location) {
+                _selectedLocation = location;
+              }
+            ),
             const SizedBox(height: 16),
             ElevatedButton.icon(
               onPressed: _savePlace,
