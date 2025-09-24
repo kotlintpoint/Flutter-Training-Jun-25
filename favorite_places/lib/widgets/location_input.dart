@@ -1,9 +1,13 @@
 import 'dart:convert';
+import 'dart:math';
 
 import 'package:favorite_places/models/place.dart';
+import 'package:favorite_places/screens/map_screen.dart';
 import 'package:flutter/material.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:location/location.dart';
 import 'package:http/http.dart' as http;
+import 'package:get/get.dart';
 
 class LocationInput extends StatefulWidget {
   const LocationInput({super.key, required this.onSelectLocation});
@@ -64,6 +68,21 @@ class _LocationInputState extends State<LocationInput> {
     if (lat == null || lng == null) {
       return;
     }
+
+    _savePlace(lat, lng);
+  }
+
+  void _selectOnMap() async {
+    final pickedLocation = await Get.to<LatLng?>(
+      MapScreen(),
+    );
+    if(pickedLocation == null){
+      return;
+    }
+    _savePlace(pickedLocation.latitude, pickedLocation.longitude);
+  }
+
+  Future<void> _savePlace(double lat, double lng) async {
     // Reverse Geocoding
     final url = Uri.parse(
       "https://maps.googleapis.com/maps/api/geocode/json?latlng=$lat,$lng&key=AIzaSyDF0kkbnVgE8g1XUaQ-r6fV5ujufLbkJ20",
@@ -130,7 +149,7 @@ class _LocationInputState extends State<LocationInput> {
             ),
             TextButton.icon(
               icon: const Icon(Icons.map),
-              onPressed: () {},
+              onPressed: _selectOnMap,
               label: const Text("Select from Map"),
             ),
           ],
